@@ -1,11 +1,16 @@
 #include "MarkdownWindow.h"
-#include <string>
 
 #define UPDATE_STATUS_BAR \
 wxString message = std::to_string(static_cast<int>(this->zoomLevel * 100)) + '%'; \
 SetStatusText(message,2); \
 this->editorFont.SetPointSize(this->zoomLevel * this->fontSize); \
-this->textCtrl->SetFont(this->editorFont);
+this->textCtrl->SetFont(this->editorFont); \
+int zoomedSizes[7]; \
+for (int i = 0; i < 7; ++i) { \
+  zoomedSizes[i] = static_cast<int>(this->htmlFontSizes[i] * this->zoomLevel); \
+} \
+this->htmlWindow->SetFonts("", "", zoomedSizes); \
+this->htmlWindow->Refresh();
 
 void MarkdownWindow::OnZoomIn(wxCommandEvent& event)
 {
@@ -26,5 +31,6 @@ void MarkdownWindow::OnZoomOut(wxCommandEvent& event)
 void MarkdownWindow::OnZoomFit(wxCommandEvent& event)
 {
   this->zoomLevel = 1.0f;
+  this->htmlWindow->SetFonts("", "", this->htmlFontSizes.data());
   UPDATE_STATUS_BAR;
 }

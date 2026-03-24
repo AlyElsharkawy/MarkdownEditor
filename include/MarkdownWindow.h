@@ -5,6 +5,7 @@
 #include <wx/textctrl.h>
 #include <wx/htmllbox.h>
 #include <wx/timer.h>
+#include <array>
 
 enum TIMER_IDS {
   TYPING_STATISTICS_TIMER = 10000,
@@ -55,6 +56,9 @@ private:
   wxFont editorFont = wxFont(wxFontInfo(std::round(fontSize * zoomLevel))
                           .Family(wxFONTFAMILY_TELETYPE)
                           .Weight(wxFontWeight::wxFONTWEIGHT_SEMIBOLD));
+  wxFont htmlFont;
+  //std::array<int,7> htmlFontSizes = { 10, 12, 14, 16, 19, 24, 32 };
+  std::array<int, 7> htmlFontSizes = {8, 9, 10, 12, 16, 22, 30};
 
   const wxString MarkdownExample = R"(
 # Hello World
@@ -65,6 +69,11 @@ This is a simple wxWidgets application that displays a "Hello World!" message in
 - wxTextCtrl
 
 # Learn More
+
+### H3 attempt
+#### H4 Attempt
+##### H5 Attempt
+###### H6 attempt
 
 Visit [wxWidgets Documentation](https://docs.wxwidgets.org/3.2) to learn more about wxWidgets.
 

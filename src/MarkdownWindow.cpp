@@ -1,4 +1,3 @@
-#include <wx/event.h>
 #include <wx/splitter.h>
 #include <wx/menu.h>
 #include <wx/statusbr.h>
@@ -10,6 +9,7 @@ wxFrame(nullptr, wxID_ANY, title, position, size)
 {
   wxSplitterWindow* splitter = new wxSplitterWindow(this, wxID_ANY);
   this->htmlWindow = new wxHtmlWindow(splitter, wxID_ANY);
+  this->htmlFont = this->htmlWindow->GetFont();
 
   this->textCtrl = new wxTextCtrl(splitter, wxID_ANY, MarkdownExample, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE);
   this->textCtrl->SetFont(editorFont);
@@ -44,6 +44,7 @@ void MarkdownWindow::RenderMarkdown()
     auto buffer = text.utf8_str();
 
     auto htmlText = cmark_markdown_to_html(buffer.data(), buffer.length(), CMARK_OPT_DEFAULT);
+    std::cout << htmlText << '\n';
 
     this->htmlWindow->SetPage(htmlText);
 

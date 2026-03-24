@@ -12,6 +12,7 @@ bool MarkdownEditor::OnInit()
 {
   MarkdownWindow* window = new MarkdownWindow("Markdown Editor", wxDefaultPosition, wxDefaultSize);
   window->Show(true);
+  window->SetSize(800, 600);
   return true;
 }
 
