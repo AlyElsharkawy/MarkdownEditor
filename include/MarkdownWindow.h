@@ -15,12 +15,9 @@ class MarkdownWindow : public wxFrame
 {
 public:
   MarkdownWindow(const wxString& title, const wxPoint& position, const wxSize& size);
-  void RenderMarkdown();
-  wxHtmlWindow* htmlWindow;
-  wxTextCtrl* textCtrl;
-  wxTimer typingStatisticsTimer;
 
 private:
+  void RenderMarkdown();
   void InitializeMenuBar(); 
   
   //File menu event handlers
@@ -50,8 +47,14 @@ private:
   void OnTypingStatisticsTimer(wxTimerEvent& event);
   void OnMarkdownRefreshTimer(wxTimerEvent& event);
 
+  wxHtmlWindow* htmlWindow;
+  wxTextCtrl* textCtrl;
+  wxTimer typingStatisticsTimer;
   float zoomLevel = 1.0f;
   int fontSize = 16;
+  wxFont editorFont = wxFont(wxFontInfo(std::round(fontSize * zoomLevel))
+                          .Family(wxFONTFAMILY_TELETYPE)
+                          .Weight(wxFontWeight::wxFONTWEIGHT_SEMIBOLD));
 
   const wxString MarkdownExample = R"(
 # Hello World

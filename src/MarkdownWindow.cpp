@@ -12,7 +12,7 @@ wxFrame(nullptr, wxID_ANY, title, position, size)
   this->htmlWindow = new wxHtmlWindow(splitter, wxID_ANY);
 
   this->textCtrl = new wxTextCtrl(splitter, wxID_ANY, MarkdownExample, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE);
-  this->textCtrl->SetFont(wxFontInfo(18).Family(wxFONTFAMILY_TELETYPE).Weight(wxFontWeight::wxFONTWEIGHT_SEMIBOLD));
+  this->textCtrl->SetFont(editorFont);
   this->textCtrl->SetValue(this->MarkdownExample);
 
   splitter->SetSashGravity(0.5);
@@ -70,6 +70,8 @@ void MarkdownWindow::InitializeMenuBar()
   wxMenu* editMenu = new wxMenu();
   editMenu->Append(wxID_UNDO, "&Undo\tCtrl+Z", "Undo the last performed action");
   editMenu->Append(wxID_REDO, "&Redo\tCtrl+Y", "Redo the last performed action");
+  editMenu->Append(wxID_FIND, "&Find\tCtrl+F", "Search for text in the markdown document");
+  editMenu->Append(wxID_REPLACE, "Find and &Replace\tCtrl+Shift+F", "Search for text in the markdown document and replace it");
   editMenu->Append(wxID_PREFERENCES, "&Preferences\tCtrl+P", "Edit user settings");
   Bind(wxEVT_MENU, &MarkdownWindow::OnUndo, this, wxID_UNDO);
   Bind(wxEVT_MENU, &MarkdownWindow::OnRedo, this, wxID_REDO);
@@ -78,12 +80,18 @@ void MarkdownWindow::InitializeMenuBar()
   wxMenu* viewMenu = new wxMenu();
   viewMenu->Append(wxID_ZOOM_IN, "Zoom &In\tCtrl+=", "Zoom in");
   viewMenu->Append(wxID_ZOOM_OUT, "Zoom &Out\tCtrl+-", "Zoom out");
-  viewMenu->Append(wxID_ZOOM_FIT, "Zoom to &Fit", "Zoom to fit");
+  viewMenu->Append(wxID_ZOOM_FIT, "Zoom to &Fit\tCtrl+0", "Zoom to fit");
+  Bind(wxEVT_MENU, &MarkdownWindow::OnZoomIn, this, wxID_ZOOM_IN);
+  Bind(wxEVT_MENU, &MarkdownWindow::OnZoomOut, this, wxID_ZOOM_OUT);
+  Bind(wxEVT_MENU, &MarkdownWindow::OnZoomFit, this, wxID_ZOOM_FIT);
 
   wxMenu* helpMenu = new wxMenu();
   helpMenu->Append(wxID_HELP_CONTEXT, "&Markdown Guide\tCtrl+G", "View online guide about the markdown specification");
   helpMenu->Append(wxID_HELP_COMMANDS, "&Shortcuts Guide\tCtrl+H", "View list of keyboard shortcuts for this program");
   helpMenu->Append(wxID_ABOUT, "View &Credits\tCtrl+L", "View credits and attribution");
+  Bind(wxEVT_MENU, &MarkdownWindow::OnHelpMarkdown, this, wxID_HELP_CONTEXT);
+  Bind(wxEVT_MENU, &MarkdownWindow::OnHelpShortcuts, this, wxID_HELP_COMMANDS);
+  Bind(wxEVT_MENU, &MarkdownWindow::OnViewCredits, this, wxID_ABOUT);
 
   menuBar->Append(fileMenu, "File");
   menuBar->Append(editMenu, "Edit");
