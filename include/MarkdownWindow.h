@@ -4,6 +4,7 @@
 #include <wx/position.h>
 #include <wx/textctrl.h>
 #include <wx/htmllbox.h>
+#include <wx/splitter.h>
 #include <wx/timer.h>
 #include <array>
 
@@ -37,6 +38,9 @@ private:
   void OnZoomIn(wxCommandEvent& event);
   void OnZoomOut(wxCommandEvent& event);
   void OnZoomFit(wxCommandEvent& event);
+  void OnMaximizeSashMarkdown(wxCommandEvent& event);
+  void OnRestoreSashMarkdown(wxCommandEvent& event);
+  void OnMinimizeSashMarkdown(wxCommandEvent& event);
 
   //Help menu event handlers
   void OnHelpMarkdown(wxCommandEvent& event);
@@ -49,16 +53,17 @@ private:
   void OnMarkdownRefreshTimer(wxTimerEvent& event);
 
   wxHtmlWindow* htmlWindow;
+  wxSplitterWindow* splitter;
   wxTextCtrl* textCtrl;
   wxTimer typingStatisticsTimer;
   float zoomLevel = 1.0f;
-  int fontSize = 16;
+  int fontSize = 12;
   wxFont editorFont = wxFont(wxFontInfo(std::round(fontSize * zoomLevel))
                           .Family(wxFONTFAMILY_TELETYPE)
                           .Weight(wxFontWeight::wxFONTWEIGHT_SEMIBOLD));
   wxFont htmlFont;
   //std::array<int,7> htmlFontSizes = { 10, 12, 14, 16, 19, 24, 32 };
-  std::array<int, 7> htmlFontSizes = {8, 9, 10, 12, 16, 22, 30};
+  std::array<int, 7> htmlFontSizes = {8, 9, 10, 12, 14, 20, 24};
 
   const wxString MarkdownExample = R"(
 # Hello World
@@ -70,10 +75,10 @@ This is a simple wxWidgets application that displays a "Hello World!" message in
 
 # Learn More
 
-### H3 attempt
-#### H4 Attempt
-##### H5 Attempt
-###### H6 attempt
+### H3 Line
+#### H4 Line
+##### H5 Line
+###### H6 Line
 
 Visit [wxWidgets Documentation](https://docs.wxwidgets.org/3.2) to learn more about wxWidgets.
 

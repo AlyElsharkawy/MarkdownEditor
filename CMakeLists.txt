@@ -11,7 +11,7 @@ include_directories("./include")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "../lib/$<CONFIG>")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "../lib/$<CONFIG>")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "../bin/$<CONFIG>")
-set(BUILD_SHARED_LIBS OFF CACHE BOOL "Force static libraries" FORCE)
+#set(BUILD_SHARED_LIBS OFF CACHE BOOL "Force static libraries" FORCE)
 FetchContent_Declare(
     cmark
     GIT_REPOSITORY https://github.com/commonmark/cmark.git
@@ -24,11 +24,6 @@ FetchContent_Declare(
     GIT_TAG        master # You can also use a specific tag like "0.8.0" for stability
 )
 
-# Turn off wxWidgets extras so we don't build useless things
-set(wxBUILD_SAMPLES OFF CACHE BOOL "Disable wxWidgets samples" FORCE)
-set(wxBUILD_TESTS OFF CACHE BOOL "Disable wxWidgets tests" FORCE)
-set(wxBUILD_DEMOS OFF CACHE BOOL "Disable wxWidgets demos" FORCE)
-
 FetchContent_MakeAvailable(cmark yaml-cpp)
 
 find_package(wxWidgets COMPONENTS core base html REQUIRED)
@@ -39,7 +34,7 @@ add_library(markdownWindow STATIC ./src/MarkdownWindow.cpp ./src/MarkdownWindowF
   ./src/MarkdownWindowUtility.cpp)
 
 add_executable(${PROJECT_NAME} ./main.cpp)
-target_link_libraries(markdownWindow PUBLIC ${wxWidgets_LIBRARIES} cmark)
+target_link_libraries(markdownWindow PUBLIC ${wxWidgets_LIBRARIES} cmark yaml-cpp)
 target_link_libraries(${PROJECT_NAME} ${wxWidgets_LIBRARIES} cmark markdownWindow)
 message(STATUS "==== WXWIDGETS LIBRARIES FOUND: ${wxWidgets_LIBRARIES} ====")
 

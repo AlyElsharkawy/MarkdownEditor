@@ -1,13 +1,15 @@
-#include <wx/splitter.h>
+#include <wx/event.h>
 #include <wx/menu.h>
 #include <wx/statusbr.h>
 #include "MarkdownWindow.h"
 #include "cmark.h"
 
+#define wxID_MINIMIZE_FRAME 11000
+
 MarkdownWindow::MarkdownWindow(const wxString& title, const wxPoint& position, const wxSize& size) :
 wxFrame(nullptr, wxID_ANY, title, position, size)
 {
-  wxSplitterWindow* splitter = new wxSplitterWindow(this, wxID_ANY);
+  this->splitter = new wxSplitterWindow(this, wxID_ANY);
   this->htmlWindow = new wxHtmlWindow(splitter, wxID_ANY);
   this->htmlFont = this->htmlWindow->GetFont();
 
@@ -16,12 +18,13 @@ wxFrame(nullptr, wxID_ANY, title, position, size)
   this->textCtrl->SetValue(this->MarkdownExample);
 
   splitter->SetSashGravity(0.5);
-  splitter->SplitVertically(this->textCtrl, this->htmlWindow);
-
+  splitter->SetMinimumPaneSize(30);
+  splitter->SplitVertically(this->textCtrl, this->htmlWindow, 0);
   this->textCtrl->Bind(wxEVT_TEXT, 
             [this](wxCommandEvent& event) {
                 RenderMarkdown();
             });
+
   InitializeMenuBar();
   CreateStatusBar(3);
   int tempWidths[] = {-1, 250, 80};
@@ -36,20 +39,16 @@ wxFrame(nullptr, wxID_ANY, title, position, size)
   this->typingStatisticsTimer.Start(250);
 
   RenderMarkdown();
+  this->Layout();
 }
 
 void MarkdownWindow::RenderMarkdown()
 {
     auto text = this->textCtrl->GetValue();
     auto buffer = text.utf8_str();
-
     auto htmlText = cmark_markdown_to_html(buffer.data(), buffer.length(), CMARK_OPT_DEFAULT);
-    std::cout << htmlText << '\n';
-
-    this->htmlWindow->SetPage(htmlText);
-
+    this->htmlWindow->SetPage(wxString::FromUTF8(htmlText));
     free(htmlText);
-
 }
 
 void MarkdownWindow::InitializeMenuBar()
@@ -82,9 +81,15 @@ void MarkdownWindow::InitializeMenuBar()
   viewMenu->Append(wxID_ZOOM_IN, "Zoom &In\tCtrl+=", "Zoom in");
   viewMenu->Append(wxID_ZOOM_OUT, "Zoom &Out\tCtrl+-", "Zoom out");
   viewMenu->Append(wxID_ZOOM_FIT, "Zoom to &Fit\tCtrl+0", "Zoom to fit");
+  viewMenu->Append(wxID_MAXIMIZE_FRAME, "Maximize Markdown Window\tCtrl+]", "Maximize Markdown window and minimize output window");
+  viewMenu->Append(wxID_MINIMIZE_FRAME, "Minimize Markdown Window\tCtrl+[", "Minimize Markdown window and maximize output window");
+  viewMenu->Append(wxID_RESTORE_FRAME, "Restore Markdown Window size\tCtrl+'", "Restore Markdown window size");
   Bind(wxEVT_MENU, &MarkdownWindow::OnZoomIn, this, wxID_ZOOM_IN);
   Bind(wxEVT_MENU, &MarkdownWindow::OnZoomOut, this, wxID_ZOOM_OUT);
   Bind(wxEVT_MENU, &MarkdownWindow::OnZoomFit, this, wxID_ZOOM_FIT);
+  Bind(wxEVT_MENU, &MarkdownWindow::OnMaximizeSashMarkdown, this, wxID_MAXIMIZE_FRAME);
+  Bind(wxEVT_MENU, &MarkdownWindow::OnMinimizeSashMarkdown, this, wxID_MINIMIZE_FRAME);
+  Bind(wxEVT_MENU, &MarkdownWindow::OnRestoreSashMarkdown, this, wxID_RESTORE_FRAME);
 
   wxMenu* helpMenu = new wxMenu();
   helpMenu->Append(wxID_HELP_CONTEXT, "&Markdown Guide\tCtrl+G", "View online guide about the markdown specification");

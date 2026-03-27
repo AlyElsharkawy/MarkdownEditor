@@ -1,3 +1,4 @@
+#include <wx/event.h>
 #include "MarkdownWindow.h"
 
 #define UPDATE_STATUS_BAR \
@@ -33,4 +34,19 @@ void MarkdownWindow::OnZoomFit(wxCommandEvent& event)
   this->zoomLevel = 1.0f;
   this->htmlWindow->SetFonts("", "", this->htmlFontSizes.data());
   UPDATE_STATUS_BAR;
+}
+
+void MarkdownWindow::OnMaximizeSashMarkdown(wxCommandEvent& event)
+{
+  this->splitter->SetSashPosition(this->splitter->GetClientSize().x - this->splitter->GetMinimumPaneSize());
+}
+
+void MarkdownWindow::OnMinimizeSashMarkdown(wxCommandEvent& event)
+{
+  this->splitter->SetSashPosition(this->splitter->GetMinimumPaneSize());
+}
+
+void MarkdownWindow::OnRestoreSashMarkdown(wxCommandEvent& event)
+{
+  this->splitter->SetSashPosition(this->splitter->GetClientSize().x / 2);
 }
