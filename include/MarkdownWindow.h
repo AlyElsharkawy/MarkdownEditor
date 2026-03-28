@@ -6,6 +6,7 @@
 #include <wx/htmllbox.h>
 #include <wx/splitter.h>
 #include <wx/timer.h>
+#include <wx/stdpaths.h>
 #include <array>
 
 enum TIMER_IDS {
@@ -17,6 +18,7 @@ class MarkdownWindow : public wxFrame
 {
 public:
   MarkdownWindow(const wxString& title, const wxPoint& position, const wxSize& size);
+  wxString recentlyOpenedFilesPath;
 
 private:
   void RenderMarkdown();
@@ -52,6 +54,9 @@ private:
   void OnTypingStatisticsTimer(wxTimerEvent& event);
   void OnMarkdownRefreshTimer(wxTimerEvent& event);
 
+  //Filesystem and file related stuff
+  void WriteRecentlyOpenedFilesIfNotExists();
+
   wxHtmlWindow* htmlWindow;
   wxSplitterWindow* splitter;
   wxTextCtrl* textCtrl;
@@ -64,6 +69,7 @@ private:
   wxFont htmlFont;
   //std::array<int,7> htmlFontSizes = { 10, 12, 14, 16, 19, 24, 32 };
   std::array<int, 7> htmlFontSizes = {8, 9, 10, 12, 14, 20, 24};
+  int defaultRecentlyOpenedFilesSize = 8;
 
   const wxString MarkdownExample = R"(
 # Hello World

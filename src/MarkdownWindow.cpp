@@ -1,6 +1,7 @@
 #include <wx/event.h>
 #include <wx/menu.h>
 #include <wx/statusbr.h>
+#include <wx/stdpaths.h>
 #include "MarkdownWindow.h"
 #include "cmark.h"
 
@@ -24,8 +25,9 @@ wxFrame(nullptr, wxID_ANY, title, position, size)
             [this](wxCommandEvent& event) {
                 RenderMarkdown();
             });
-
+  this->recentlyOpenedFilesPath = wxStandardPaths::Get().GetUserDataDir();
   InitializeMenuBar();
+  WriteRecentlyOpenedFilesIfNotExists();
   CreateStatusBar(3);
   int tempWidths[] = {-1, 250, 80};
   SetStatusWidths(3, tempWidths);

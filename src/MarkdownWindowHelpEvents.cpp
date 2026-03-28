@@ -55,6 +55,12 @@ void MarkdownWindow::OnHelpShortcuts(wxCommandEvent& event)
   list->SetItem(13, 1, "View shortcuts cheat sheet");
   list->InsertItem(14, "Ctrl + L");
   list->SetItem(14, 1, "View credits");
+  list->InsertItem(15, "Ctrl + {");
+  list->SetItem(15, 1, "Minimize markdown window");
+  list->InsertItem(16, "Ctrl + }");
+  list->SetItem(16, 1, "Maximize markdown window");
+  list->InsertItem(17, "Ctrl + '");
+  list->SetItem(17, 1, "Restore markdown window");
   wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
   sizer->Add(list, 1, wxEXPAND | wxALL, 10);
   wxSizer* buttonSizer = dialog.CreateButtonSizer(wxOK);
