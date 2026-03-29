@@ -19,3 +19,7 @@ void MarkdownWindow::WriteRecentlyOpenedFilesIfNotExists()
     outputFile.close();
   }
 }
+
+void MarkdownWindow::UpdateRecentFilesSubmenu()
+{
+}

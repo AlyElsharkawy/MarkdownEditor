@@ -1,5 +1,6 @@
 #include <wx/event.h>
 #include <wx/filedlg.h>
+#include <wx/msgdlg.h>
 #include <wx/log.h>
 #include <wx/utils.h>
 #include <fstream>
@@ -7,6 +8,19 @@
 
 void MarkdownWindow::OnNewFile(wxCommandEvent& event)
 {
+  if(this->textCtrl->IsModified())
+  {
+    wxMessageDialog saveDialog(this, "Do you want to save your changes before opening a new file?",
+                              "Unsaved changes", wxYES_NO | wxCANCEL | wxICON_QUESTION);
+    int result = saveDialog.ShowModal();
+    if(result == wxID_CANCEL) 
+    {
+      return;
+    }
+    else if(result == wxID_YES) {
+      OnSaveFile(event);
+    }
+  }
   SetStatusText("Successfully created new file", 0);
   this->textCtrl->SetValue("");
   RenderMarkdown();
@@ -23,10 +37,12 @@ void MarkdownWindow::OnOpenFile(wxCommandEvent& event)
   if(openDialog.ShowModal() == wxID_OK)
   {
     if(this->textCtrl->LoadFile(openDialog.GetPath())) {
-        this->currentlyOpenedFile = openDialog.GetPath();
-        std::cout << "Currently opened file: " << this->currentlyOpenedFile << '\n';
-        RenderMarkdown();
-        SetStatusText("Opened file: " + openDialog.GetFilename(), 0);
+      this->currentlyOpenedFile = openDialog.GetPath();
+      this->recentFiles.push(this->currentlyOpenedFile);
+      this->textCtrl->SetModified(false);
+      UpdateRecentFilesSubmenu();
+      RenderMarkdown();
+      SetStatusText("Opened file: " + openDialog.GetFilename(), 0);
     }
     else 
     {
@@ -45,6 +61,7 @@ void MarkdownWindow::OnSaveFile(wxCommandEvent& event)
     {
       outputFile << this->textCtrl->GetValue();
       outputFile.close();
+      this->textCtrl->SetModified(false);
     }
     else 
     {
@@ -75,6 +92,8 @@ void MarkdownWindow::OnSaveAsFile(wxCommandEvent& event)
     outputMarkdownFile << this->textCtrl->GetValue();
     outputMarkdownFile.close();
     SetStatusText("Successfully saved file " + filePath + '.', 0);
+    this->currentlyOpenedFile = saveDialog.GetPath();
+    this->textCtrl->SetModified(false);
   }
   else 
   {
@@ -85,5 +104,18 @@ void MarkdownWindow::OnSaveAsFile(wxCommandEvent& event)
 
 void MarkdownWindow::OnQuit(wxCommandEvent& event)
 {
+  if(this->textCtrl->IsModified())
+  {
+    wxMessageDialog saveDialog(this, "Do you want to save your changes before closing?",
+                              "Unsaved changes", wxYES_NO | wxCANCEL | wxICON_QUESTION);
+    int result = saveDialog.ShowModal();
+    if(result == wxID_CANCEL) 
+    {
+      return;
+    }
+    else if(result == wxID_YES) {
+      OnSaveFile(event);
+    }
+  }
   Close();
 }

@@ -2,6 +2,7 @@
 #include <wx/menu.h>
 #include <wx/statusbr.h>
 #include <wx/stdpaths.h>
+#include <wx/msgdlg.h>
 #include "MarkdownWindow.h"
 #include "cmark.h"
 #include "MarkdownExample.h"
@@ -69,6 +70,7 @@ void MarkdownWindow::InitializeMenuBar()
   Bind(wxEVT_MENU, &MarkdownWindow::OnSaveFile, this, wxID_SAVE);
   Bind(wxEVT_MENU, &MarkdownWindow::OnSaveAsFile, this, wxID_SAVEAS);
   Bind(wxEVT_MENU, &MarkdownWindow::OnQuit, this, wxID_EXIT);
+  Bind(wxEVT_CLOSE_WINDOW, &MarkdownWindow::OnQuitApplication, this);
 
   wxMenu* editMenu = new wxMenu();
   editMenu->Append(wxID_UNDO, "&Undo\tCtrl+Z", "Undo the last performed action");
@@ -107,4 +109,25 @@ void MarkdownWindow::InitializeMenuBar()
   menuBar->Append(viewMenu, "View");
   menuBar->Append(helpMenu, "Help");
   SetMenuBar(menuBar);
+}
+
+void MarkdownWindow::OnQuitApplication(wxCloseEvent& event)
+{
+  if(this->textCtrl->IsModified())
+  {
+    wxMessageDialog saveDialog(this, "Do you want to save your changes before closing?",
+                              "Unsaved changes", wxYES_NO | wxCANCEL | wxICON_QUESTION);
+    int result = saveDialog.ShowModal();
+    if(result == wxID_CANCEL) 
+    {
+      return;
+    }
+    else if(result == wxID_YES) {
+      //Yes, this is a terrible solution!
+      //The saving functionality should be independent from the event handling logic!
+      wxCommandEvent dummyEvent(wxEVT_MENU);
+      OnSaveFile(dummyEvent);
+    }
+  }
+  event.Skip();
 }

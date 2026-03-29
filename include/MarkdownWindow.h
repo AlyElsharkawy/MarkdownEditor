@@ -24,6 +24,8 @@ public:
 private:
   void RenderMarkdown();
   void InitializeMenuBar(); 
+  void UpdateRecentFilesSubmenu();
+  void OnQuitApplication(wxCloseEvent& event);
   
   //File menu event handlers
   void OnNewFile(wxCommandEvent& event);
