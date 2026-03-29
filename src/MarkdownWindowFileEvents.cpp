@@ -23,6 +23,8 @@ void MarkdownWindow::OnOpenFile(wxCommandEvent& event)
   if(openDialog.ShowModal() == wxID_OK)
   {
     if(this->textCtrl->LoadFile(openDialog.GetPath())) {
+        this->currentlyOpenedFile = openDialog.GetPath();
+        std::cout << "Currently opened file: " << this->currentlyOpenedFile << '\n';
         RenderMarkdown();
         SetStatusText("Opened file: " + openDialog.GetFilename(), 0);
     }
@@ -36,7 +38,24 @@ void MarkdownWindow::OnOpenFile(wxCommandEvent& event)
 
 void MarkdownWindow::OnSaveFile(wxCommandEvent& event)
 {
-  OnSaveAsFile(event);
+  if(this->currentlyOpenedFile != "")
+  {
+    std::ofstream outputFile(this->currentlyOpenedFile, std::ios::out | std::ios::trunc);
+    if(outputFile.is_open())
+    {
+      outputFile << this->textCtrl->GetValue();
+      outputFile.close();
+    }
+    else 
+    {
+      SetStatusText("Failed to save file " + this->currentlyOpenedFile + '.', 0);
+      wxLogError("Cannot save current contents to file '%s'.", this->currentlyOpenedFile);
+    }
+  }
+  else
+  {
+    OnSaveAsFile(event);
+  }
 }
 
 void MarkdownWindow::OnSaveAsFile(wxCommandEvent& event)

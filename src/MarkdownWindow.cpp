@@ -4,6 +4,7 @@
 #include <wx/stdpaths.h>
 #include "MarkdownWindow.h"
 #include "cmark.h"
+#include "MarkdownExample.h"
 
 #define wxID_MINIMIZE_FRAME 11000
 
@@ -16,7 +17,7 @@ wxFrame(nullptr, wxID_ANY, title, position, size)
 
   this->textCtrl = new wxTextCtrl(splitter, wxID_ANY, MarkdownExample, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE);
   this->textCtrl->SetFont(editorFont);
-  this->textCtrl->SetValue(this->MarkdownExample);
+  this->textCtrl->SetValue(MarkdownExample);
 
   splitter->SetSashGravity(0.5);
   splitter->SetMinimumPaneSize(30);

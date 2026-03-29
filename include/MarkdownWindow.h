@@ -8,6 +8,7 @@
 #include <wx/timer.h>
 #include <wx/stdpaths.h>
 #include <array>
+#include "CircularQueue.h"
 
 enum TIMER_IDS {
   TYPING_STATISTICS_TIMER = 10000,
@@ -69,26 +70,7 @@ private:
   wxFont htmlFont;
   //std::array<int,7> htmlFontSizes = { 10, 12, 14, 16, 19, 24, 32 };
   std::array<int, 7> htmlFontSizes = {8, 9, 10, 12, 14, 20, 24};
-  int defaultRecentlyOpenedFilesSize = 8;
-
-  const wxString MarkdownExample = R"(
-# Hello World
-This is a simple wxWidgets application that displays a "Hello World!" message in a text control.
-
-## Features
-- wxFrame
-- wxTextCtrl
-
-# Learn More
-
-### H3 Line
-#### H4 Line
-##### H5 Line
-###### H6 Line
-
-Visit [wxWidgets Documentation](https://docs.wxwidgets.org/3.2) to learn more about wxWidgets.
-
-# Created by Aly Elsharkawy 23/3/2026
-    )";
-
+  constexpr static int defaultRecentlyOpenedFilesSize = 8;
+  CircularStack<wxString, defaultRecentlyOpenedFilesSize> recentFiles;
+  wxString currentlyOpenedFile = "";
 };
