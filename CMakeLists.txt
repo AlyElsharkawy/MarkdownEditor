@@ -18,13 +18,7 @@ FetchContent_Declare(
     GIT_TAG 0.31.1
 )
 
-FetchContent_Declare(
-    yaml-cpp
-    GIT_REPOSITORY https://github.com/jbeder/yaml-cpp.git
-    GIT_TAG        master # You can also use a specific tag like "0.8.0" for stability
-)
-
-FetchContent_MakeAvailable(cmark yaml-cpp)
+FetchContent_MakeAvailable(cmark)
 
 find_package(wxWidgets COMPONENTS core stc base html REQUIRED)
 include(${wxWidgets_USE_FILE})
@@ -34,7 +28,7 @@ add_library(markdownWindow STATIC ./src/MarkdownWindow.cpp ./src/MarkdownWindowF
   ./src/MarkdownWindowUtility.cpp)
 
 add_executable(${PROJECT_NAME} ./main.cpp)
-target_link_libraries(markdownWindow PUBLIC ${wxWidgets_LIBRARIES} cmark yaml-cpp)
+target_link_libraries(markdownWindow PUBLIC ${wxWidgets_LIBRARIES} cmark)
 target_link_libraries(${PROJECT_NAME} ${wxWidgets_LIBRARIES} cmark markdownWindow)
 message(STATUS "==== WXWIDGETS LIBRARIES FOUND: ${wxWidgets_LIBRARIES} ====")
 

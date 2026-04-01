@@ -1,14 +1,12 @@
 #include <wx/event.h>
 #include "MarkdownWindow.h"
-#include "yaml-cpp/mark.h"
 
 #define UPDATE_STATUS_BAR \
 wxString message = std::to_string(static_cast<int>(this->zoomLevel * 100)) + '%'; \
 SetStatusText(message,2); \
 this->editorFont.SetPointSize(this->zoomLevel * this->fontSize); \
-this->textCtrl->SetFont(this->editorFont); \
 this->textCtrl->StyleSetFont(wxSTC_STYLE_DEFAULT, editorFont); \
-  this->textCtrl->StyleClearAll(); \
+this->textCtrl->StyleClearAll(); \
 int zoomedSizes[7]; \
 for (int i = 0; i < 7; ++i) { \
   zoomedSizes[i] = static_cast<int>(this->htmlFontSizes[i] * this->zoomLevel); \

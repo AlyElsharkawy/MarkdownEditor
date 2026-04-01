@@ -11,6 +11,7 @@
 #include <wx/filehistory.h>
 #include <wx/menu.h>
 #include <wx/menuitem.h>
+#include <wx/fdrepdlg.h>
 #include <array>
 
 enum TIMER_IDS {
@@ -43,6 +44,7 @@ private:
   void OnPreferences(wxCommandEvent& event);
   void OnFind(wxCommandEvent& event);
   void OnFindAndReplace(wxCommandEvent& event);
+  void OnFindReplaceDialogEvent(wxFindDialogEvent& event);
 
   //View menu event handlers
   void OnZoomIn(wxCommandEvent& event);
@@ -60,7 +62,6 @@ private:
   void OnViewCredits(wxCommandEvent& event);
 
   void CalculateTypingStatistics(const wxString& input);
-
   void OnTypingStatisticsTimer(wxTimerEvent& event);
   void OnMarkdownRefreshTimer(wxTimerEvent& event);
   void OnHTMLLinkClicked(wxHtmlLinkEvent& event);
@@ -70,15 +71,15 @@ private:
   wxStyledTextCtrl* textCtrl;
   wxTimer typingStatisticsTimer;
   float zoomLevel = 1.0f;
-  int fontSize = 12;
-  wxFont editorFont = wxFont(wxFontInfo(std::round(fontSize * zoomLevel))
-                          .Family(wxFONTFAMILY_DEFAULT)
-                          .Weight(wxFontWeight::wxFONTWEIGHT_SEMIBOLD));
+  int fontSize = 13;
+  wxFont editorFont;
   wxFont htmlFont;
   //std::array<int,7> htmlFontSizes = { 10, 12, 14, 16, 19, 24, 32 };
-  std::array<int, 7> htmlFontSizes = {8, 9, 10, 12, 14, 20, 24};
+  std::array<int, 7> htmlFontSizes = {8, 9, 12, 14, 16, 18, 24};
   wxFileHistory recentFiles;
   wxMenu* recentFilesSubmenu;
   wxMenuItem* recentFilesMenuItem;
   wxString currentlyOpenedFile = "";
+  wxFindReplaceData findData;
+  wxFindReplaceDialog* findDialog = nullptr;
 };

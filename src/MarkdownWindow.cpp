@@ -15,6 +15,9 @@
 MarkdownWindow::MarkdownWindow(const wxString& title, const wxPoint& position, const wxSize& size) :
 wxFrame(nullptr, wxID_ANY, title, position, size)
 {
+  editorFont = wxFont(wxFontInfo(std::round(fontSize * zoomLevel))
+                          .Family(wxFONTFAMILY_DEFAULT)
+                          .Weight(wxFontWeight::wxFONTWEIGHT_SEMIBOLD));
   this->splitter = new wxSplitterWindow(this, wxID_ANY);
   this->htmlWindow = new wxHtmlWindow(splitter, wxID_ANY);
   this->htmlWindow->Bind(wxEVT_HTML_LINK_CLICKED, &MarkdownWindow::OnHTMLLinkClicked, this);
@@ -31,9 +34,10 @@ wxFrame(nullptr, wxID_ANY, title, position, size)
   this->textCtrl->StyleSetForeground(wxSTC_STYLE_DEFAULT, fgColor);
   this->textCtrl->SetCaretForeground(fgColor);
   this->textCtrl->StyleClearAll();
-
-  this->textCtrl->SetFont(editorFont);
   this->textCtrl->SetValue(MarkdownExample);
+  //Unbind default shortcuts
+  this->textCtrl->CmdKeyClearAll();
+  this->textCtrl->EmptyUndoBuffer(); //To prevent deletion of initial markdown
 
   splitter->SetSashGravity(0.5);
   splitter->SetMinimumPaneSize(30);
@@ -57,6 +61,8 @@ wxFrame(nullptr, wxID_ANY, title, position, size)
   Bind(wxEVT_TIMER, &MarkdownWindow::OnTypingStatisticsTimer, this, TIMER_IDS::TYPING_STATISTICS_TIMER);
   this->typingStatisticsTimer.Start(250);
 
+  this->htmlWindow->SetFonts("", "", this->htmlFontSizes.data());
+  this->htmlWindow->Refresh();
   RenderMarkdown();
   this->Layout();
 }
@@ -75,7 +81,6 @@ void MarkdownWindow::InitializeMenuBar()
   this->recentFilesSubmenu = new wxMenu();
   this->recentFiles.UseMenu(this->recentFilesSubmenu);
   this->recentFiles.Load(*wxConfig::Get());
-  std::cout << "Recent files size: " << recentFiles.GetCount() << '\n';
   wxMenuBar* menuBar = new wxMenuBar();
 
   wxMenu* fileMenu = new wxMenu();
@@ -113,6 +118,14 @@ void MarkdownWindow::InitializeMenuBar()
   Bind(wxEVT_MENU, &MarkdownWindow::OnPreferences, this, wxID_PREFERENCES);
   Bind(wxEVT_MENU, &MarkdownWindow::OnFind, this, wxID_FIND);
   Bind(wxEVT_MENU, &MarkdownWindow::OnFindAndReplace, this, wxID_REPLACE);
+
+  //Route all find and find & replace events to a central handling function
+  Bind(wxEVT_FIND, &MarkdownWindow::OnFindReplaceDialogEvent, this);
+  Bind(wxEVT_FIND_NEXT, &MarkdownWindow::OnFindReplaceDialogEvent, this);
+  Bind(wxEVT_FIND_REPLACE, &MarkdownWindow::OnFindReplaceDialogEvent, this);
+  Bind(wxEVT_FIND_REPLACE_ALL, &MarkdownWindow::OnFindReplaceDialogEvent, this);
+  Bind(wxEVT_FIND_CLOSE, &MarkdownWindow::OnFindReplaceDialogEvent, this);
+
   Bind(wxEVT_UPDATE_UI, [this](wxUpdateUIEvent& event) {
     event.Enable(this->textCtrl->CanUndo());
   }, wxID_UNDO);
@@ -125,8 +138,8 @@ void MarkdownWindow::InitializeMenuBar()
   viewMenu->Append(wxID_ZOOM_OUT, "Zoom &Out\tCtrl+-", "Zoom out");
   viewMenu->Append(wxID_ZOOM_FIT, "Zoom to &Fit\tCtrl+0", "Zoom to fit");
   viewMenu->AppendSeparator();
-  viewMenu->Append(wxID_FORWARD, "&Next Window\tCtrl+Right");
-  viewMenu->Append(wxID_BACKWARD, "&Previous Window\tCtrl+Left");
+  viewMenu->Append(wxID_FORWARD, "&Next Window\tCtrl+E");
+  viewMenu->Append(wxID_BACKWARD, "&Previous Window\tCtrl+Q");
   viewMenu->AppendSeparator();
   viewMenu->Append(wxID_MAXIMIZE_FRAME, "Maximize Markdown Window\tCtrl+]", "Maximize Markdown windoww");
   viewMenu->Append(wxID_MINIMIZE_FRAME, "Minimize Markdown Window\tCtrl+[", "Minimize Markdown window");
