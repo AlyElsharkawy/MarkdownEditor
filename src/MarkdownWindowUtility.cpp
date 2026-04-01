@@ -22,3 +22,15 @@ void MarkdownWindow::OnTypingStatisticsTimer(wxTimerEvent& event)
 {
   CalculateTypingStatistics(this->textCtrl->GetValue());
 }
+
+void MarkdownWindow::OnHTMLLinkClicked(wxHtmlLinkEvent& event)
+{
+  const wxHtmlLinkInfo& info = event.GetLinkInfo();
+  wxString href = info.GetHref();
+  if (href.StartsWith("http://") || href.StartsWith("https://")) {
+    wxLaunchDefaultBrowser(href);
+  }
+  else {
+    event.Skip();
+  }
+}

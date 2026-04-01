@@ -1,8 +1,9 @@
 #pragma once
 #include <wx/event.h>
 #include <wx/frame.h>
+#include <wx/html/htmlwin.h>
 #include <wx/position.h>
-#include <wx/textctrl.h>
+#include <wx/stc/stc.h>
 #include <wx/htmllbox.h>
 #include <wx/splitter.h>
 #include <wx/timer.h>
@@ -62,15 +63,16 @@ private:
 
   void OnTypingStatisticsTimer(wxTimerEvent& event);
   void OnMarkdownRefreshTimer(wxTimerEvent& event);
+  void OnHTMLLinkClicked(wxHtmlLinkEvent& event);
 
   wxHtmlWindow* htmlWindow;
   wxSplitterWindow* splitter;
-  wxTextCtrl* textCtrl;
+  wxStyledTextCtrl* textCtrl;
   wxTimer typingStatisticsTimer;
   float zoomLevel = 1.0f;
   int fontSize = 12;
   wxFont editorFont = wxFont(wxFontInfo(std::round(fontSize * zoomLevel))
-                          .Family(wxFONTFAMILY_TELETYPE)
+                          .Family(wxFONTFAMILY_DEFAULT)
                           .Weight(wxFontWeight::wxFONTWEIGHT_SEMIBOLD));
   wxFont htmlFont;
   //std::array<int,7> htmlFontSizes = { 10, 12, 14, 16, 19, 24, 32 };

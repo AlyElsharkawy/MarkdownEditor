@@ -3,10 +3,18 @@
 
 void MarkdownWindow::OnUndo(wxCommandEvent& event)
 {
+  if(this->textCtrl->CanUndo())
+  {
+    this->textCtrl->Undo();
+  }
 }
 
 void MarkdownWindow::OnRedo(wxCommandEvent& event)
 {
+  if(this->textCtrl->CanRedo())
+  {
+    this->textCtrl->Redo();
+  }
 }
 
 void MarkdownWindow::OnPreferences(wxCommandEvent& event)

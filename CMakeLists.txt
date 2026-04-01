@@ -26,7 +26,7 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(cmark yaml-cpp)
 
-find_package(wxWidgets COMPONENTS core base html REQUIRED)
+find_package(wxWidgets COMPONENTS core stc base html REQUIRED)
 include(${wxWidgets_USE_FILE})
 
 add_library(markdownWindow STATIC ./src/MarkdownWindow.cpp ./src/MarkdownWindowFileEvents.cpp

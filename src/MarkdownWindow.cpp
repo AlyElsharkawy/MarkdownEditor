@@ -1,9 +1,11 @@
 #include <wx/event.h>
+#include <wx/html/htmlwin.h>
 #include <wx/statusbr.h>
 #include <wx/stdpaths.h>
 #include <wx/msgdlg.h>
 #include <wx/config.h>
 #include <wx/menuitem.h>
+#include <wx/settings.h>
 #include "MarkdownWindow.h"
 #include "cmark.h"
 #include "MarkdownExample.h"
@@ -15,16 +17,29 @@ wxFrame(nullptr, wxID_ANY, title, position, size)
 {
   this->splitter = new wxSplitterWindow(this, wxID_ANY);
   this->htmlWindow = new wxHtmlWindow(splitter, wxID_ANY);
+  this->htmlWindow->Bind(wxEVT_HTML_LINK_CLICKED, &MarkdownWindow::OnHTMLLinkClicked, this);
   this->htmlFont = this->htmlWindow->GetFont();
 
-  this->textCtrl = new wxTextCtrl(splitter, wxID_ANY, MarkdownExample, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE);
+  this->textCtrl = new wxStyledTextCtrl(splitter, wxID_ANY, wxDefaultPosition, wxDefaultSize);
+  this->textCtrl->SetWrapMode(wxSTC_WRAP_WORD);
+  this->textCtrl->StyleSetFont(wxSTC_STYLE_DEFAULT, editorFont);
+
+  //Manual dark-mode support
+  wxColour bgColor = wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW);
+  wxColour fgColor = wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT);
+  this->textCtrl->StyleSetBackground(wxSTC_STYLE_DEFAULT, bgColor);
+  this->textCtrl->StyleSetForeground(wxSTC_STYLE_DEFAULT, fgColor);
+  this->textCtrl->SetCaretForeground(fgColor);
+  this->textCtrl->StyleClearAll();
+
   this->textCtrl->SetFont(editorFont);
   this->textCtrl->SetValue(MarkdownExample);
 
   splitter->SetSashGravity(0.5);
   splitter->SetMinimumPaneSize(30);
   splitter->SplitVertically(this->textCtrl, this->htmlWindow, 0);
-  this->textCtrl->Bind(wxEVT_TEXT, 
+  //TO comment out
+  this->textCtrl->Bind(wxEVT_STC_CHANGE, 
             [this](wxCommandEvent& event) {
                 RenderMarkdown();
             });
@@ -98,6 +113,12 @@ void MarkdownWindow::InitializeMenuBar()
   Bind(wxEVT_MENU, &MarkdownWindow::OnPreferences, this, wxID_PREFERENCES);
   Bind(wxEVT_MENU, &MarkdownWindow::OnFind, this, wxID_FIND);
   Bind(wxEVT_MENU, &MarkdownWindow::OnFindAndReplace, this, wxID_REPLACE);
+  Bind(wxEVT_UPDATE_UI, [this](wxUpdateUIEvent& event) {
+    event.Enable(this->textCtrl->CanUndo());
+  }, wxID_UNDO);
+  Bind(wxEVT_UPDATE_UI, [this](wxUpdateUIEvent& event) {
+    event.Enable(this->textCtrl->CanRedo());
+  }, wxID_REDO);
 
   wxMenu* viewMenu = new wxMenu();
   viewMenu->Append(wxID_ZOOM_IN, "Zoom &In\tCtrl+=", "Zoom in");

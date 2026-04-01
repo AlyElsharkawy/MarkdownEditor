@@ -25,7 +25,6 @@ bool MarkdownEditor::OnInit()
     wxCONFIG_USE_LOCAL_FILE
   ));
   std::cout << "App Name: " << wxTheApp->GetAppName() << '\n';
-  std::cout << "Config Directory: " << wxConfig::Get() << '\n';
 
   MarkdownWindow* window = new MarkdownWindow("Simple Markdown Editor", wxDefaultPosition, wxDefaultSize);
   window->Show(true);
