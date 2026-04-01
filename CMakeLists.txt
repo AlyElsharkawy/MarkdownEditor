@@ -31,7 +31,7 @@ include(${wxWidgets_USE_FILE})
 
 add_library(markdownWindow STATIC ./src/MarkdownWindow.cpp ./src/MarkdownWindowFileEvents.cpp
   ./src/MarkdownWindowEditEvents.cpp ./src/MarkdownWindowViewEvents.cpp ./src/MarkdownWindowHelpEvents.cpp
-  ./src/MarkdownWindowUtility.cpp ./src/MarkdownWindowFilesystemUtilities.cpp)
+  ./src/MarkdownWindowUtility.cpp)
 
 add_executable(${PROJECT_NAME} ./main.cpp)
 target_link_libraries(markdownWindow PUBLIC ${wxWidgets_LIBRARIES} cmark yaml-cpp)

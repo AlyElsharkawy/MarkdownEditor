@@ -12,3 +12,11 @@ void MarkdownWindow::OnRedo(wxCommandEvent& event)
 void MarkdownWindow::OnPreferences(wxCommandEvent& event)
 {
 }
+
+void MarkdownWindow::OnFind(wxCommandEvent& event)
+{
+}
+
+void MarkdownWindow::OnFindAndReplace(wxCommandEvent& event)
+{
+}

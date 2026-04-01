@@ -7,8 +7,10 @@
 #include <wx/splitter.h>
 #include <wx/timer.h>
 #include <wx/stdpaths.h>
+#include <wx/filehistory.h>
+#include <wx/menu.h>
+#include <wx/menuitem.h>
 #include <array>
-#include "CircularQueue.h"
 
 enum TIMER_IDS {
   TYPING_STATISTICS_TIMER = 10000,
@@ -19,30 +21,34 @@ class MarkdownWindow : public wxFrame
 {
 public:
   MarkdownWindow(const wxString& title, const wxPoint& position, const wxSize& size);
-  wxString recentlyOpenedFilesPath;
 
 private:
   void RenderMarkdown();
   void InitializeMenuBar(); 
-  void UpdateRecentFilesSubmenu();
   void OnQuitApplication(wxCloseEvent& event);
   
   //File menu event handlers
   void OnNewFile(wxCommandEvent& event);
   void OnOpenFile(wxCommandEvent& event);
+  void OnOpenRecentFile(wxCommandEvent& event);
   void OnSaveFile(wxCommandEvent& event);
   void OnSaveAsFile(wxCommandEvent& event);
   void OnQuit(wxCommandEvent& event);
+  void OnCloseWindow(wxCommandEvent& event);
 
   //Edit menu event handlers
   void OnUndo(wxCommandEvent& event);
   void OnRedo(wxCommandEvent& event);
   void OnPreferences(wxCommandEvent& event);
+  void OnFind(wxCommandEvent& event);
+  void OnFindAndReplace(wxCommandEvent& event);
 
   //View menu event handlers
   void OnZoomIn(wxCommandEvent& event);
   void OnZoomOut(wxCommandEvent& event);
   void OnZoomFit(wxCommandEvent& event);
+  void OnGoToNextWindow(wxCommandEvent& event);
+  void OnGoToPreviousWindow(wxCommandEvent& event);
   void OnMaximizeSashMarkdown(wxCommandEvent& event);
   void OnRestoreSashMarkdown(wxCommandEvent& event);
   void OnMinimizeSashMarkdown(wxCommandEvent& event);
@@ -57,9 +63,6 @@ private:
   void OnTypingStatisticsTimer(wxTimerEvent& event);
   void OnMarkdownRefreshTimer(wxTimerEvent& event);
 
-  //Filesystem and file related stuff
-  void WriteRecentlyOpenedFilesIfNotExists();
-
   wxHtmlWindow* htmlWindow;
   wxSplitterWindow* splitter;
   wxTextCtrl* textCtrl;
@@ -72,7 +75,8 @@ private:
   wxFont htmlFont;
   //std::array<int,7> htmlFontSizes = { 10, 12, 14, 16, 19, 24, 32 };
   std::array<int, 7> htmlFontSizes = {8, 9, 10, 12, 14, 20, 24};
-  constexpr static int defaultRecentlyOpenedFilesSize = 8;
-  CircularStack<wxString, defaultRecentlyOpenedFilesSize> recentFiles;
+  wxFileHistory recentFiles;
+  wxMenu* recentFilesSubmenu;
+  wxMenuItem* recentFilesMenuItem;
   wxString currentlyOpenedFile = "";
 };

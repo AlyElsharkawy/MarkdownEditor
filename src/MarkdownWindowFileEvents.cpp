@@ -3,6 +3,7 @@
 #include <wx/msgdlg.h>
 #include <wx/log.h>
 #include <wx/utils.h>
+#include <wx/config.h>
 #include <fstream>
 #include "MarkdownWindow.h"
 
@@ -38,17 +39,38 @@ void MarkdownWindow::OnOpenFile(wxCommandEvent& event)
   {
     if(this->textCtrl->LoadFile(openDialog.GetPath())) {
       this->currentlyOpenedFile = openDialog.GetPath();
-      this->recentFiles.push(this->currentlyOpenedFile);
       this->textCtrl->SetModified(false);
-      UpdateRecentFilesSubmenu();
+      this->recentFiles.AddFileToHistory(openDialog.GetPath());
+      this->recentFiles.Save(*wxConfig::Get());
       RenderMarkdown();
       SetStatusText("Opened file: " + openDialog.GetFilename(), 0);
+      if(this->recentFiles.GetCount() > 0)
+        this->recentFilesMenuItem->Enable(true);
     }
     else 
     {
       SetStatusText("Failed to open file " + filePath + '.', 0);
       wxLogError("Cannot open file '%s'.", filePath);
     }
+  }
+}
+
+void MarkdownWindow::OnOpenRecentFile(wxCommandEvent& event)
+{
+  int index = event.GetId() - wxID_FILE1;
+  wxString path = this->recentFiles.GetHistoryFile(index);
+  if(this->textCtrl->LoadFile(path)) {
+    this->currentlyOpenedFile = path;
+    this->textCtrl->SetModified(false);
+    this->recentFiles.AddFileToHistory(path);
+    this->recentFiles.Save(*wxConfig::Get());
+    RenderMarkdown();
+    SetStatusText("Opened file: " + path, 0);
+  }
+  else 
+  {
+    SetStatusText("Failed to open file " + path + '.', 0);
+    wxLogError("Cannot open file '%s'.", path);
   }
 }
 
@@ -118,4 +140,8 @@ void MarkdownWindow::OnQuit(wxCommandEvent& event)
     }
   }
   Close();
+}
+
+void MarkdownWindow::OnCloseWindow(wxCommandEvent& event)
+{
 }

@@ -1,5 +1,6 @@
 #include <wx/event.h>
 #include "MarkdownWindow.h"
+#include "yaml-cpp/mark.h"
 
 #define UPDATE_STATUS_BAR \
 wxString message = std::to_string(static_cast<int>(this->zoomLevel * 100)) + '%'; \
@@ -49,4 +50,12 @@ void MarkdownWindow::OnMinimizeSashMarkdown(wxCommandEvent& event)
 void MarkdownWindow::OnRestoreSashMarkdown(wxCommandEvent& event)
 {
   this->splitter->SetSashPosition(this->splitter->GetClientSize().x / 2);
+}
+
+void MarkdownWindow::OnGoToNextWindow(wxCommandEvent& event)
+{
+}
+
+void MarkdownWindow::OnGoToPreviousWindow(wxCommandEvent& event)
+{
 }
