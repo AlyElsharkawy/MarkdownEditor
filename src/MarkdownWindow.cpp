@@ -64,6 +64,8 @@ wxFrame(nullptr, wxID_ANY, title, position, size)
   this->htmlWindow->SetFonts("", "", this->htmlFontSizes.data());
   this->htmlWindow->Refresh();
   RenderMarkdown();
+
+  this->findData.SetFlags(wxFR_DOWN);
   this->Layout();
 }
 
