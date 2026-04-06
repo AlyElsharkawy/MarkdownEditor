@@ -5,14 +5,15 @@
 wxString message = std::to_string(static_cast<int>(this->zoomLevel * 100)) + '%'; \
 SetStatusText(message,2); \
 this->editorFont.SetPointSize(this->zoomLevel * this->fontSize); \
-this->textCtrl->StyleSetFont(wxSTC_STYLE_DEFAULT, editorFont); \
-this->textCtrl->StyleClearAll(); \
+this->styledWindows[CURRENT_TAB]->StyleSetFont(wxSTC_STYLE_DEFAULT, editorFont); \
+this->styledWindows[CURRENT_TAB]->StyleClearAll(); \
 int zoomedSizes[7]; \
 for (int i = 0; i < 7; ++i) { \
   zoomedSizes[i] = static_cast<int>(this->htmlFontSizes[i] * this->zoomLevel); \
 } \
-this->htmlWindow->SetFonts("", "", zoomedSizes); \
-this->htmlWindow->Refresh();
+for(int i = 0; i < this->htmlWindows.size(); i++) \
+   {this->htmlWindows[i]->SetFonts("", "", zoomedSizes); } \
+this->htmlWindows[CURRENT_TAB]->Refresh();
 
 void MarkdownWindow::OnZoomIn(wxCommandEvent& event)
 {
@@ -33,29 +34,48 @@ void MarkdownWindow::OnZoomOut(wxCommandEvent& event)
 void MarkdownWindow::OnZoomFit(wxCommandEvent& event)
 {
   this->zoomLevel = 1.0f;
-  this->htmlWindow->SetFonts("", "", this->htmlFontSizes.data());
+  this->htmlWindows[CURRENT_TAB]->SetFonts("", "", this->htmlFontSizes.data());
   UPDATE_STATUS_BAR;
 }
 
 void MarkdownWindow::OnMaximizeSashMarkdown(wxCommandEvent& event)
 {
-  this->splitter->SetSashPosition(this->splitter->GetClientSize().x - this->splitter->GetMinimumPaneSize());
+  this->splitters[CURRENT_TAB]->SetSashPosition(this->splitters[CURRENT_TAB]->GetClientSize().x -
+                                  this->splitters[CURRENT_TAB]->GetMinimumPaneSize());
 }
 
 void MarkdownWindow::OnMinimizeSashMarkdown(wxCommandEvent& event)
 {
-  this->splitter->SetSashPosition(this->splitter->GetMinimumPaneSize());
+  this->splitters[CURRENT_TAB]->SetSashPosition(this->splitters[CURRENT_TAB]->GetMinimumPaneSize());
 }
 
 void MarkdownWindow::OnRestoreSashMarkdown(wxCommandEvent& event)
 {
-  this->splitter->SetSashPosition(this->splitter->GetClientSize().x / 2);
+  this->splitters[CURRENT_TAB]->SetSashPosition(this->splitters[CURRENT_TAB]->GetClientSize().x / 2);
 }
 
 void MarkdownWindow::OnGoToNextWindow(wxCommandEvent& event)
 {
+  if(this->styledWindows.size() == 1) return;
+  int index = this->notebook->GetSelection();
+  index++;
+  if(index >= this->styledWindows.size())
+    index = 0;
+  this->notebook->SetSelection(index);
+  this->styledWindows[index]->SetFocus();
+  this->styledWindows[index]->GotoPos(0);
+  SetStatusText("Switched to: " + this->currentlyOpenedFiles[index], 0);
 }
 
 void MarkdownWindow::OnGoToPreviousWindow(wxCommandEvent& event)
 {
+  if(this->styledWindows.size() == 1) return;
+  int index = this->notebook->GetSelection();
+  index--;
+  if(index < 0)
+    index = this->styledWindows.size() - 1;
+  this->notebook->SetSelection(index);
+  this->styledWindows[index]->SetFocus();
+  this->styledWindows[index]->GotoPos(0);
+  SetStatusText("Switched to: " + this->currentlyOpenedFiles[index], 0);
 }

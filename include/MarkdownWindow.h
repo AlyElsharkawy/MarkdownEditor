@@ -1,6 +1,8 @@
 #pragma once
+#include <wx/bookctrl.h>
 #include <wx/event.h>
 #include <wx/frame.h>
+#include <wx/gdicmn.h>
 #include <wx/html/htmlwin.h>
 #include <wx/position.h>
 #include <wx/stc/stc.h>
@@ -12,22 +14,33 @@
 #include <wx/menu.h>
 #include <wx/menuitem.h>
 #include <wx/fdrepdlg.h>
+#include <wx/notebook.h>
+#include <deque>
 #include <array>
+
+#define CURRENT_TAB this->notebook->GetSelection()
 
 enum TIMER_IDS {
   TYPING_STATISTICS_TIMER = 10000,
   MARKDOWN_REFRESH_TIMER,
 };
 
+enum MISC_IDS {
+  RENAME_TAB = 12000,
+};
+
 class MarkdownWindow : public wxFrame
 {
 public:
   MarkdownWindow(const wxString& title, const wxPoint& position, const wxSize& size);
+  ~MarkdownWindow();
 
 private:
-  void RenderMarkdown();
+  void RenderMarkdown(int index);
   void InitializeMenuBar(); 
+  void InitializeNotebookTabContextMenu();
   void OnQuitApplication(wxCloseEvent& event);
+  void CreateTab(const wxString& name, bool isFocused);
   
   //File menu event handlers
   void OnNewFile(wxCommandEvent& event);
@@ -37,6 +50,7 @@ private:
   void OnSaveAsFile(wxCommandEvent& event);
   void OnQuit(wxCommandEvent& event);
   void OnCloseWindow(wxCommandEvent& event);
+  void OnCloseAllWindows(wxCommandEvent& event);
 
   //Edit menu event handlers
   void OnUndo(wxCommandEvent& event);
@@ -65,10 +79,15 @@ private:
   void OnTypingStatisticsTimer(wxTimerEvent& event);
   void OnMarkdownRefreshTimer(wxTimerEvent& event);
   void OnHTMLLinkClicked(wxHtmlLinkEvent& event);
+  void OnTabChange(wxBookCtrlEvent& event);
+  void OnNotebookTabRightClick(wxMouseEvent& event);
+  void OnNotebookTabDoubleClick(wxMouseEvent& event);
+  void OnRenameTabContextMenu(wxCommandEvent& event);
 
-  wxHtmlWindow* htmlWindow;
-  wxSplitterWindow* splitter;
-  wxStyledTextCtrl* textCtrl;
+  //wxHtmlWindow* htmlWindow;
+  //wxSplitterWindow* splitter;
+  //wxStyledTextCtrl* textCtrl;
+  int targetTab = wxNOT_FOUND;
   wxTimer typingStatisticsTimer;
   float zoomLevel = 1.0f;
   int fontSize = 13;
@@ -78,8 +97,15 @@ private:
   std::array<int, 7> htmlFontSizes = {8, 9, 12, 14, 16, 18, 24};
   wxFileHistory recentFiles;
   wxMenu* recentFilesSubmenu;
+  wxMenu* notebookTabContextMenu;
   wxMenuItem* recentFilesMenuItem;
-  wxString currentlyOpenedFile = "";
+  std::deque<wxString> currentlyOpenedFiles;
   wxFindReplaceData findData;
   wxFindReplaceDialog* findDialog = nullptr;
+
+  std::deque<wxHtmlWindow*> htmlWindows;
+  std::deque<wxStyledTextCtrl*> styledWindows;
+  std::deque<wxSplitterWindow*> splitters;
+  wxNotebook* notebook;
+  wxColor bgColor, fgColor;
 };

@@ -1,21 +1,21 @@
-#include "MarkdownWindow.h"
 #include <wx/event.h>
 #include <wx/fdrepdlg.h>
 #include <wx/msgdlg.h>
+#include "MarkdownWindow.h"
 
 void MarkdownWindow::OnUndo(wxCommandEvent& event)
 {
-  if(this->textCtrl->CanUndo())
+  if(this->styledWindows[CURRENT_TAB]->CanUndo())
   {
-    this->textCtrl->Undo();
+    this->styledWindows[CURRENT_TAB]->Undo();
   }
 }
 
 void MarkdownWindow::OnRedo(wxCommandEvent& event)
 {
-  if(this->textCtrl->CanRedo())
+  if(this->styledWindows[CURRENT_TAB]->CanRedo())
   {
-    this->textCtrl->Redo();
+    this->styledWindows[CURRENT_TAB]->Redo();
   }
 }
 
@@ -67,28 +67,28 @@ void MarkdownWindow::OnFindReplaceDialogEvent(wxFindDialogEvent& event)
     resultFlags |= wxFR_MATCHCASE;
   if(flags & wxFR_WHOLEWORD)
     resultFlags |= wxFR_WHOLEWORD;
-  this->textCtrl->SetSearchFlags(resultFlags);
+  this->styledWindows[CURRENT_TAB]->SetSearchFlags(resultFlags);
   
   wxEventType eventType = event.GetEventType();
   if(type == wxEVT_FIND || type == wxEVT_FIND_NEXT)
   {
-    long startingPosition = this->textCtrl->GetCurrentPos();
-    long endingPosition = this->textCtrl->GetLastPosition();
+    long startingPosition = this->styledWindows[CURRENT_TAB]->GetCurrentPos();
+    long endingPosition = this->styledWindows[CURRENT_TAB]->GetLastPosition();
 
     //If we are searching upwards, then make start the current position
     if(!(flags & wxFR_DOWN)) 
     {
       endingPosition = 0;
-      startingPosition = this->textCtrl->GetAnchor();
+      startingPosition = this->styledWindows[CURRENT_TAB]->GetAnchor();
     }
 
-    this->textCtrl->SetTargetStart(startingPosition);
-    this->textCtrl->SetTargetEnd(endingPosition);
-    int finalPosition = this->textCtrl->SearchInTarget(findString);
+    this->styledWindows[CURRENT_TAB]->SetTargetStart(startingPosition);
+    this->styledWindows[CURRENT_TAB]->SetTargetEnd(endingPosition);
+    int finalPosition = this->styledWindows[CURRENT_TAB]->SearchInTarget(findString);
     if(finalPosition != wxNOT_FOUND)
     {
-      this->textCtrl->SetSelection(this->textCtrl->GetTargetStart(), this->textCtrl->GetTargetEnd());
-      this->textCtrl->EnsureCaretVisible();
+      this->styledWindows[CURRENT_TAB]->SetSelection(this->styledWindows[CURRENT_TAB]->GetTargetStart(), this->styledWindows[CURRENT_TAB]->GetTargetEnd());
+      this->styledWindows[CURRENT_TAB]->EnsureCaretVisible();
     }
     else 
     {
@@ -100,12 +100,12 @@ void MarkdownWindow::OnFindReplaceDialogEvent(wxFindDialogEvent& event)
   else if (type == wxEVT_FIND_REPLACE)
   {
     wxString replaceStr = event.GetReplaceString();
-    wxString selectedText = this->textCtrl->GetStringSelection();
+    wxString selectedText = this->styledWindows[CURRENT_TAB]->GetStringSelection();
     // Ensure the user actually has the search string selected before replacing it
     bool match = (flags & wxFR_MATCHCASE) ? (selectedText == findString) : (selectedText.Lower() == findString.Lower());
     if (match)
     {
-      this->textCtrl->ReplaceSelection(replaceStr);
+      this->styledWindows[CURRENT_TAB]->ReplaceSelection(replaceStr);
     }
         
     // Automatically trigger a "Find Next" so the user can keep clicking "Replace"
@@ -122,18 +122,18 @@ void MarkdownWindow::OnFindReplaceDialogEvent(wxFindDialogEvent& event)
     int replaceCount = 0;
         
     // Set the target to the entire document
-    this->textCtrl->SetTargetStart(0);
-    this->textCtrl->SetTargetEnd(this->textCtrl->GetLastPosition());
+    this->styledWindows[CURRENT_TAB]->SetTargetStart(0);
+    this->styledWindows[CURRENT_TAB]->SetTargetEnd(this->styledWindows[CURRENT_TAB]->GetLastPosition());
         
     // Loop through and replace every instance
-    while (this->textCtrl->SearchInTarget(findString) != wxNOT_FOUND)
+    while (this->styledWindows[CURRENT_TAB]->SearchInTarget(findString) != wxNOT_FOUND)
     {
-      this->textCtrl->ReplaceTarget(replaceStr);
+      this->styledWindows[CURRENT_TAB]->ReplaceTarget(replaceStr);
       replaceCount++;
             
       // Move target start forward so we don't get stuck in an infinite loop
-      this->textCtrl->SetTargetStart(this->textCtrl->GetTargetEnd());
-      this->textCtrl->SetTargetEnd(this->textCtrl->GetLastPosition());
+      this->styledWindows[CURRENT_TAB]->SetTargetStart(this->styledWindows[CURRENT_TAB]->GetTargetEnd());
+      this->styledWindows[CURRENT_TAB]->SetTargetEnd(this->styledWindows[CURRENT_TAB]->GetLastPosition());
     }
         
     wxMessageBox(wxString::Format("Replaced %d occurrences.", replaceCount), "Replace All", wxOK | wxICON_INFORMATION, this);

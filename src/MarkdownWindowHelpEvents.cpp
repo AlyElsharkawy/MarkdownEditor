@@ -3,12 +3,25 @@
 #include <wx/msgdlg.h>
 #include <wx/sizer.h>
 #include <wx/listctrl.h>
+#include <wx/stc/stc.h>
 #include "CheatSheet.h"
 #include "MarkdownWindow.h"
 
+int FindTabIndexByName(wxNotebook* notebook, const wxString& targetName) 
+{
+  for (size_t i = 0; i < notebook->GetPageCount(); ++i) 
+  {
+    if (notebook->GetPageText(i) == targetName) 
+    {
+      return i; // Match found! Return the index.
+    }
+  }
+  return wxNOT_FOUND; // wxNOT_FOUND is a standard wxWidgets macro that equals -1
+}
+
 void MarkdownWindow::OnHelpMarkdown(wxCommandEvent& event)
 {
-  wxMessageDialog helpDialog(this, 
+  /*wxMessageDialog helpDialog(this, 
                            wxString("Would you like to view a markdown cheatsheet? This will overwrite your currently loaded document!"), 
                            wxString("Load Cheatsheet?"), 
                            wxYES_NO | wxNO_DEFAULT | wxICON_QUESTION);
@@ -16,6 +29,13 @@ void MarkdownWindow::OnHelpMarkdown(wxCommandEvent& event)
   {
     this->textCtrl->SetValue(wxString::FromUTF8(CHEAT_SHEET));
     RenderMarkdown();
+  }*/
+  int existingPageIndex = FindTabIndexByName(this->notebook, "Cheatsheet.md");
+  if(existingPageIndex == wxNOT_FOUND)
+  {
+    CreateTab("Cheatsheet.md",true);
+    wxStyledTextCtrl* newTab = this->styledWindows.back();
+    this->styledWindows[CURRENT_TAB]->SetValue(wxString::FromUTF8(CHEAT_SHEET));
   }
 }
 
@@ -33,7 +53,7 @@ void MarkdownWindow::OnHelpShortcuts(wxCommandEvent& event)
   list->SetItem(2, 1, "Saves the current file and always opens a new save dialog");
   list->InsertItem(3, "Ctrl + O");
   list->SetItem(3, 1, "Open a file from disk for editing");
-  list->InsertItem(4, "Ctrl + Q");
+  list->InsertItem(4, "Ctrl + Shift + X");
   list->SetItem(4, 1, "Quit the program");
   list->InsertItem(5, "Ctrl + Z");
   list->SetItem(5, 1, "Undoes the last performed editing action");
@@ -61,6 +81,10 @@ void MarkdownWindow::OnHelpShortcuts(wxCommandEvent& event)
   list->SetItem(16, 1, "Maximize markdown window");
   list->InsertItem(17, "Ctrl + '");
   list->SetItem(17, 1, "Restore markdown window");
+  list->InsertItem(18, "Ctrl + Q");
+  list->SetItem(18, 1, "Go to previous tab");
+  list->InsertItem(19, "Ctrl + E");
+  list->SetItem(19, 1, "Go to next tab");
   wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
   sizer->Add(list, 1, wxEXPAND | wxALL, 10);
   wxSizer* buttonSizer = dialog.CreateButtonSizer(wxOK);
