@@ -3,3 +3,6 @@ build/
 build-release/
 lib/
 .cache/
+patterns.txt
+project_design_pattern.pdf
+

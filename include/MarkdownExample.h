@@ -18,5 +18,9 @@ This is a simple wxWidgets application that displays a "Hello World!" message in
 
 Visit [wxWidgets Documentation](https://docs.wxwidgets.org/3.2) to learn more about wxWidgets.
 
+```bash
+echo "This is a bash code block\!"
+```
+
 # Created by Aly Elsharkawy 23/3/2026
     )";

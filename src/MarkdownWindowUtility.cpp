@@ -1,5 +1,4 @@
 #include <wx/event.h>
-#include <wx/gdicmn.h>
 #include <wx/regex.h>
 #include <wx/textdlg.h>
 #include "MarkdownWindow.h"
@@ -45,6 +44,16 @@ void MarkdownWindow::OnHTMLLinkClicked(wxHtmlLinkEvent& event)
   }
   else {
     event.Skip();
+  }
+}
+
+void MarkdownWindow::OnWebViewNavigation(wxWebViewEvent& event)
+{
+  wxString url = event.GetURL();
+  if (!url.StartsWith("about:") && !url.StartsWith("data:"))
+  {
+    wxLaunchDefaultBrowser(url);
+    event.Veto();
   }
 }
 
@@ -196,6 +205,41 @@ void MarkdownWindow::OnRenameTabContextMenu(wxCommandEvent& event)
   {
     this->notebook->SetPageText(this->targetTab, dialog.GetValue());
   }
+  wxString statusMessage = wxString::Format("Successfully renamed %s tab to %s", oldName, dialog.GetValue());
+  SetStatusText(statusMessage, 0);
+}
+
+wxString GetDuplicateName(const wxString& originalName)
+{
+  wxRegEx re(" \\(([0-9]+)\\)$");
+  wxString newName = originalName;
+  if (re.Matches(originalName))
+  {
+    wxString numStr = re.GetMatch(originalName, 1);
+    long count;
+    numStr.ToLong(&count);
+    count++;
+    size_t start, len;
+    re.GetMatch(&start, &len, 0);
+        
+    newName = originalName.Left(start) + wxString::Format(" (%ld)", count);
+  } 
+  else
+  {
+    newName << " (1)";
+  }
+  return newName;
+}
+
+//PROTOTYPE PATTERN
+void MarkdownWindow::OnNotebookTabDuplicate(wxCommandEvent& event)
+{
+  if(this->targetTab == wxNOT_FOUND) return;
+  wxString tabName = this->notebook->GetPageText(this->targetTab);
+  CreateTab(GetDuplicateName(tabName), true);
+
+  wxString statusMessage = wxString::Format("Successfully cloned tab %s", tabName);
+  SetStatusText(statusMessage, 0);
 }
 
 void MarkdownWindow::InitializeNotebookTabContextMenu()
@@ -205,12 +249,14 @@ void MarkdownWindow::InitializeNotebookTabContextMenu()
   this->notebookTabContextMenu->AppendSeparator();
   this->notebookTabContextMenu->Append(wxID_SAVE, "Save");
   this->notebookTabContextMenu->Append(wxID_SAVEAS, "Save As");
+  this->notebookTabContextMenu->Append(wxID_COPY, "Duplicate");
   this->notebookTabContextMenu->AppendSeparator();
   this->notebookTabContextMenu->Append(wxID_CLOSE, "Close");
   this->notebookTabContextMenu->Append(wxID_CLOSE_ALL, "Close All");
 
   Bind(wxEVT_MENU, &MarkdownWindow::OnSaveFile, this, wxID_SAVE);
   Bind(wxEVT_MENU, &MarkdownWindow::OnSaveAsFile, this, wxID_SAVEAS);
+  Bind(wxEVT_MENU, &MarkdownWindow::OnNotebookTabDuplicate, this, wxID_COPY);
   Bind(wxEVT_MENU, &MarkdownWindow::OnCloseWindow, this, wxID_CLOSE);
   Bind(wxEVT_MENU, &MarkdownWindow::OnCloseAllWindows, this, wxID_CLOSE_ALL);
   Bind(wxEVT_MENU, &MarkdownWindow::OnRenameTabContextMenu, this, MISC_IDS::RENAME_TAB);

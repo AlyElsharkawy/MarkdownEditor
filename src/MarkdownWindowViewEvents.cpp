@@ -7,13 +7,14 @@ SetStatusText(message,2); \
 this->editorFont.SetPointSize(this->zoomLevel * this->fontSize); \
 this->styledWindows[CURRENT_TAB]->StyleSetFont(wxSTC_STYLE_DEFAULT, editorFont); \
 this->styledWindows[CURRENT_TAB]->StyleClearAll(); \
-int zoomedSizes[7]; \
+this->htmlWindows[CURRENT_TAB]->GetControl()->Refresh(); \
+this->htmlWindows[CURRENT_TAB]->SetZoom(this->zoomLevel);
+/*std::array<int, 7> zoomedSizes; \
 for (int i = 0; i < 7; ++i) { \
   zoomedSizes[i] = static_cast<int>(this->htmlFontSizes[i] * this->zoomLevel); \
 } \
 for(int i = 0; i < this->htmlWindows.size(); i++) \
-   {this->htmlWindows[i]->SetFonts("", "", zoomedSizes); } \
-this->htmlWindows[CURRENT_TAB]->Refresh();
+   {this->htmlWindows[i]->SetFontSizes(zoomedSizes); } \*/
 
 void MarkdownWindow::OnZoomIn(wxCommandEvent& event)
 {
@@ -34,7 +35,7 @@ void MarkdownWindow::OnZoomOut(wxCommandEvent& event)
 void MarkdownWindow::OnZoomFit(wxCommandEvent& event)
 {
   this->zoomLevel = 1.0f;
-  this->htmlWindows[CURRENT_TAB]->SetFonts("", "", this->htmlFontSizes.data());
+  this->htmlWindows[CURRENT_TAB]->SetFontSizes(this->htmlFontSizes);
   UPDATE_STATUS_BAR;
 }
 

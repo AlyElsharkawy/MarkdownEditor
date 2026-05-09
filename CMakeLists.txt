@@ -20,15 +20,26 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(cmark)
 
-find_package(wxWidgets COMPONENTS core stc base html REQUIRED)
+find_package(wxWidgets COMPONENTS core stc base html webview REQUIRED)
 include(${wxWidgets_USE_FILE})
 
 add_library(markdownWindow STATIC ./src/MarkdownWindow.cpp ./src/MarkdownWindowFileEvents.cpp
   ./src/MarkdownWindowEditEvents.cpp ./src/MarkdownWindowViewEvents.cpp ./src/MarkdownWindowHelpEvents.cpp
   ./src/MarkdownWindowUtility.cpp)
+add_library(SimpleHtmlBackend STATIC ./src/SimpleHtmlBackend.cpp)
+add_library(WebViewHtmlBackend STATIC ./src/WebViewHtmlBackend.cpp)
+add_library(HtmlBackendFactory STATIC ./src/HtmlBackendFactory.cpp)
+target_link_libraries(SimpleHtmlBackend ${wxWidgets_LIBRARIES})
+target_link_libraries(WebViewHtmlBackend ${wxWidgets_LIBRARIES})
+target_link_libraries(HtmlBackendFactory SimpleHtmlBackend WebViewHtmlBackend)
 
 add_executable(${PROJECT_NAME} ./main.cpp)
+if(CMAKE_BUILD_TYPE STREQUAL "debug")
+  target_compile_definitions(${PROJECT_NAME} PRIVATE DEBUG_MODE)
+endif()
+
 target_link_libraries(markdownWindow PUBLIC ${wxWidgets_LIBRARIES} cmark)
-target_link_libraries(${PROJECT_NAME} ${wxWidgets_LIBRARIES} cmark markdownWindow)
+target_link_libraries(${PROJECT_NAME} ${wxWidgets_LIBRARIES} cmark markdownWindow SimpleHtmlBackend
+  HtmlBackendFactory)
 message(STATUS "==== WXWIDGETS LIBRARIES FOUND: ${wxWidgets_LIBRARIES} ====")
 

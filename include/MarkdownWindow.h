@@ -3,7 +3,6 @@
 #include <wx/event.h>
 #include <wx/frame.h>
 #include <wx/gdicmn.h>
-#include <wx/html/htmlwin.h>
 #include <wx/position.h>
 #include <wx/stc/stc.h>
 #include <wx/htmllbox.h>
@@ -17,6 +16,8 @@
 #include <wx/notebook.h>
 #include <deque>
 #include <array>
+#include <wx/webview.h>
+#include "HtmlBackend.h"
 
 #define CURRENT_TAB this->notebook->GetSelection()
 
@@ -79,9 +80,11 @@ private:
   void OnTypingStatisticsTimer(wxTimerEvent& event);
   void OnMarkdownRefreshTimer(wxTimerEvent& event);
   void OnHTMLLinkClicked(wxHtmlLinkEvent& event);
+  void OnWebViewNavigation(wxWebViewEvent& event);
   void OnTabChange(wxBookCtrlEvent& event);
   void OnNotebookTabRightClick(wxMouseEvent& event);
   void OnNotebookTabDoubleClick(wxMouseEvent& event);
+  void OnNotebookTabDuplicate(wxCommandEvent& event);
   void OnRenameTabContextMenu(wxCommandEvent& event);
 
   //wxHtmlWindow* htmlWindow;
@@ -103,7 +106,7 @@ private:
   wxFindReplaceData findData;
   wxFindReplaceDialog* findDialog = nullptr;
 
-  std::deque<wxHtmlWindow*> htmlWindows;
+  std::deque<HtmlBackend*> htmlWindows;
   std::deque<wxStyledTextCtrl*> styledWindows;
   std::deque<wxSplitterWindow*> splitters;
   wxNotebook* notebook;

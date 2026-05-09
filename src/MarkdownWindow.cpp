@@ -1,5 +1,4 @@
 #include <wx/event.h>
-#include <wx/gdicmn.h>
 #include <wx/html/htmlwin.h>
 #include <wx/statusbr.h>
 #include <wx/stc/stc.h>
@@ -8,9 +7,11 @@
 #include <wx/config.h>
 #include <wx/menuitem.h>
 #include <wx/settings.h>
+#include <wx/webview.h>
 #include "MarkdownWindow.h"
-#include "cmark.h"
 #include "MarkdownExample.h"
+#include "HtmlBackendFactory.h"
+#include "cmark.h"
 
 MarkdownWindow::MarkdownWindow(const wxString& title, const wxPoint& position, const wxSize& size) :
 wxFrame(nullptr, wxID_ANY, title, position, size)
@@ -47,9 +48,9 @@ MarkdownWindow::~MarkdownWindow()
 void MarkdownWindow::CreateTab(const wxString& name, bool isFocused)
 {
   wxSplitterWindow* splitter = new wxSplitterWindow(this->notebook, wxID_ANY);
-  wxHtmlWindow* htmlWindow = new wxHtmlWindow(splitter, wxID_ANY);
-  htmlWindow->Bind(wxEVT_HTML_LINK_CLICKED, &MarkdownWindow::OnHTMLLinkClicked, this);
-  //this->htmlFont = htmlWindow->GetFont();
+  HtmlBackend* htmlWindow = BackendFactory::CreateBackend(splitter, BACKEND_TYPES::WEB_VIEW_HTML_WINDOW);
+  htmlWindow->GetControl()->Bind(wxEVT_HTML_LINK_CLICKED, &MarkdownWindow::OnHTMLLinkClicked, this);
+  htmlWindow->GetControl()->Bind(wxEVT_WEBVIEW_NAVIGATING, &MarkdownWindow::OnWebViewNavigation, this);
 
   wxStyledTextCtrl* textCtrl = new wxStyledTextCtrl(splitter, wxID_ANY, wxDefaultPosition, wxDefaultSize);
   textCtrl->SetWrapMode(wxSTC_WRAP_WORD);
@@ -66,7 +67,7 @@ void MarkdownWindow::CreateTab(const wxString& name, bool isFocused)
 
   splitter->SetSashGravity(0.5);
   splitter->SetMinimumPaneSize(30);
-  splitter->SplitVertically(textCtrl, htmlWindow, 0);
+  splitter->SplitVertically(textCtrl, htmlWindow->GetControl(), 0);
   
   //TO comment out
   textCtrl->Bind(wxEVT_STC_CHANGE, 
@@ -78,8 +79,8 @@ void MarkdownWindow::CreateTab(const wxString& name, bool isFocused)
   Bind(wxEVT_TIMER, &MarkdownWindow::OnTypingStatisticsTimer, this, TIMER_IDS::TYPING_STATISTICS_TIMER);
   this->typingStatisticsTimer.Start(250);
 
-  htmlWindow->SetFonts("", "", this->htmlFontSizes.data());
-  htmlWindow->Refresh();
+  htmlWindow->SetFontSizes(this->htmlFontSizes);
+  htmlWindow->GetControl()->Refresh();
   CalculateTypingStatistics(textCtrl->GetValue());
   this->notebook->AddPage(splitter, name, isFocused);
   this->htmlWindows.push_back(htmlWindow);
@@ -94,7 +95,9 @@ void MarkdownWindow::RenderMarkdown(int index)
     auto text = this->styledWindows[index]->GetValue();
     auto buffer = text.utf8_str();
     auto htmlText = cmark_markdown_to_html(buffer.data(), buffer.length(), CMARK_OPT_DEFAULT);
-    this->htmlWindows[CURRENT_TAB]->SetPage(wxString::FromUTF8(htmlText));
+    this->htmlWindows[CURRENT_TAB]->SetHtmlText(htmlText);
+    this->htmlWindows[CURRENT_TAB]->SetCSSStyle("h1{font-size:40px}");
+    std::cout << "HTML Text: \n" << this->htmlWindows[CURRENT_TAB]->GetHTMLContents() << '\n';
     free(htmlText);
 }
 
